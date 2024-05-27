@@ -22,7 +22,7 @@ class _RoomListState extends State<Landing> {
     super.initState();
   }
 
-  Future<void> _dialogBuilder(BuildContext context) {
+  Future<void> _showDialog(BuildContext context) {
     return showDialog<void>(
       context: context,
       builder: (BuildContext context) {
@@ -159,7 +159,7 @@ class _RoomListState extends State<Landing> {
                   icon: const Icon(Icons.search),
                 ),
                 IconButton(
-                  onPressed: () => _dialogBuilder(context),
+                  onPressed: () => _showDialog(context),
                   icon: const Icon(Icons.add),
                 ),
                 IconButton(
