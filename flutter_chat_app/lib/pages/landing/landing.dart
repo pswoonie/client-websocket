@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_chat_app/pages/chat_room_list/chat_room_list.dart';
 import 'package:flutter_chat_app/pages/friends/friends.dart';
@@ -16,11 +18,17 @@ class _RoomListState extends State<Landing> {
   final formKey = GlobalKey<FormState>();
   int currentPageIndex = 1;
   var rooms = <RoomObject>[];
+  final String chars =
+      'AaBbCcDdEeFfGgHhIiJjKkLlMmNnOoPpQqRrSsTtUuVvWwXxYyZz1234567890';
+  final Random random = Random();
 
   @override
   void initState() {
     super.initState();
   }
+
+  String _getRandomString(int length) => String.fromCharCodes(Iterable.generate(
+      length, (_) => chars.codeUnitAt(random.nextInt(chars.length))));
 
   Future<void> _showDialog(BuildContext context) {
     return showDialog<void>(
@@ -68,7 +76,7 @@ class _RoomListState extends State<Landing> {
                 context.pop();
                 var room = RoomObject(
                   title: 'title',
-                  id: 'id',
+                  id: _getRandomString(25),
                   members: [],
                 );
                 setState(() {
@@ -152,19 +160,28 @@ class _RoomListState extends State<Landing> {
           ),
           textAlign: TextAlign.center,
         ),
-        actions: (currentPageIndex == 1)
+        actions: (currentPageIndex == 0 || currentPageIndex == 1)
             ? [
-                IconButton(
-                  onPressed: () {},
-                  icon: const Icon(Icons.search),
+                Visibility(
+                  visible: currentPageIndex == 0,
+                  child: IconButton(
+                    onPressed: () {},
+                    icon: const Icon(Icons.search),
+                  ),
                 ),
-                IconButton(
-                  onPressed: () => _showDialog(context),
-                  icon: const Icon(Icons.add),
+                Visibility(
+                  visible: currentPageIndex == 1,
+                  child: IconButton(
+                    onPressed: () => _showDialog(context),
+                    icon: const Icon(Icons.add),
+                  ),
                 ),
-                IconButton(
-                  onPressed: () {},
-                  icon: const Icon(Icons.settings),
+                Visibility(
+                  visible: currentPageIndex == 1,
+                  child: IconButton(
+                    onPressed: () {},
+                    icon: const Icon(Icons.settings),
+                  ),
                 ),
               ]
             : [],
@@ -182,6 +199,13 @@ class _RoomListState extends State<Landing> {
         decoration: BoxDecoration(
           color: Colors.deepPurple[100],
           borderRadius: BorderRadius.circular(50),
+          boxShadow: const [
+            BoxShadow(
+              color: Colors.deepPurple,
+              blurRadius: 10,
+              offset: Offset(0, 0.75),
+            ),
+          ],
         ),
         child: NavigationBar(
           backgroundColor: Colors.transparent,
