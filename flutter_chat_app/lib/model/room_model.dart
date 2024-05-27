@@ -8,6 +8,6 @@ class RoomModel {
     required this.title,
     required this.id,
     required this.members,
-    this.isRead = false,
+    this.isRead = true,
   });
 }

@@ -1,6 +1,7 @@
 import 'dart:math';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_chat_app/state/chat_list_state.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../model/room_model.dart';
@@ -18,8 +19,8 @@ class Landing extends StatefulWidget {
 
 class _RoomListState extends State<Landing> {
   final formKey = GlobalKey<FormState>();
+  ChatRoomListState chatRoomListStateController = ChatRoomListState();
   int currentPageIndex = 1;
-  var rooms = <RoomModel>[];
   final String chars =
       'AaBbCcDdEeFfGgHhIiJjKkLlMmNnOoPpQqRrSsTtUuVvWwXxYyZz1234567890';
   final Random random = Random();
@@ -27,6 +28,7 @@ class _RoomListState extends State<Landing> {
   @override
   void initState() {
     super.initState();
+    chatRoomListStateController.setUnreadCounts();
   }
 
   String _getRandomString(int length) => String.fromCharCodes(Iterable.generate(
@@ -91,9 +93,7 @@ class _RoomListState extends State<Landing> {
                     id: _getRandomString(25),
                     members: [],
                   );
-                  setState(() {
-                    rooms.add(room);
-                  });
+                  chatRoomListStateController.addRoom(room);
                   context.pop();
                 }
               },
@@ -119,15 +119,17 @@ class _RoomListState extends State<Landing> {
     }
   }
 
-  Widget _getIcon(int index) {
+  Widget _getIcon(int index, int unreadCount) {
     switch (index) {
       case 0:
         return const Icon(Icons.group);
       case 1:
-        return const Badge(
-          label: Text('2'),
-          child: Icon(Icons.chat),
-        );
+        return (unreadCount > 0)
+            ? Badge(
+                label: Text('$unreadCount'),
+                child: const Icon(Icons.chat),
+              )
+            : const Icon(Icons.chat);
       case 2:
         return const Icon(Icons.shop);
       case 3:
@@ -152,9 +154,9 @@ class _RoomListState extends State<Landing> {
     }
   }
 
-  Widget _getNavigationDestinationIcon(int index) {
+  Widget _getNavigationDestinationIcon(int index, int unreadCount) {
     return NavigationDestination(
-      icon: _getIcon(index),
+      icon: _getIcon(index, unreadCount),
       label: _getLabel(index),
     );
   }
@@ -202,7 +204,7 @@ class _RoomListState extends State<Landing> {
       ),
       body: <Widget>[
         const Friends(),
-        ChatRoomList(rooms: rooms),
+        ChatRoomList(chatRoomListStateController: chatRoomListStateController),
         const Shop(),
         const More(),
       ][currentPageIndex],
@@ -221,20 +223,25 @@ class _RoomListState extends State<Landing> {
             ),
           ],
         ),
-        child: NavigationBar(
-          backgroundColor: Colors.transparent,
-          elevation: 0,
-          selectedIndex: currentPageIndex,
-          onDestinationSelected: (index) {
-            setState(() {
-              currentPageIndex = index;
-            });
-          },
-          destinations: List.generate(
-            4,
-            (index) => _getNavigationDestinationIcon(index),
-          ),
-        ),
+        child: ListenableBuilder(
+            listenable: chatRoomListStateController,
+            builder: (context, child) {
+              return NavigationBar(
+                backgroundColor: Colors.transparent,
+                elevation: 0,
+                selectedIndex: currentPageIndex,
+                onDestinationSelected: (index) {
+                  setState(() {
+                    currentPageIndex = index;
+                  });
+                },
+                destinations: List.generate(
+                  4,
+                  (index) => _getNavigationDestinationIcon(
+                      index, chatRoomListStateController.unread),
+                ),
+              );
+            }),
       ),
     );
   }
