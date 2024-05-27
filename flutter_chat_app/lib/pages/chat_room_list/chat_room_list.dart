@@ -1,17 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
-class RoomObject {
-  String title;
-  String id;
-  List members;
-
-  RoomObject({
-    required this.title,
-    required this.id,
-    required this.members,
-  });
-}
+import '../../model/room_model.dart';
 
 class ChatRoomList extends StatefulWidget {
   final List<RoomObject> rooms;

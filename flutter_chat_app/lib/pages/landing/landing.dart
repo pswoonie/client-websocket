@@ -1,11 +1,13 @@
 import 'dart:math';
 
 import 'package:flutter/material.dart';
-import 'package:flutter_chat_app/pages/chat_room_list/chat_room_list.dart';
-import 'package:flutter_chat_app/pages/friends/friends.dart';
-import 'package:flutter_chat_app/pages/more/more.dart';
-import 'package:flutter_chat_app/pages/shop/shop.dart';
 import 'package:go_router/go_router.dart';
+
+import '../../model/room_model.dart';
+import '../chat_room_list/chat_room_list.dart';
+import '../friends/friends.dart';
+import '../more/more.dart';
+import '../shop/shop.dart';
 
 class Landing extends StatefulWidget {
   const Landing({super.key});
@@ -31,6 +33,7 @@ class _RoomListState extends State<Landing> {
       length, (_) => chars.codeUnitAt(random.nextInt(chars.length))));
 
   Future<void> _showDialog(BuildContext context) {
+    String title = '';
     return showDialog<void>(
       context: context,
       builder: (BuildContext context) {
@@ -44,13 +47,20 @@ class _RoomListState extends State<Landing> {
               child: Column(
                 children: [
                   TextFormField(
+                    onSaved: (str) {
+                      if (str != null) {
+                        title = str;
+                      }
+                    },
+                    validator: (str) {
+                      if (str == null || str.isEmpty) {
+                        return 'Title is REQUIRED!';
+                      }
+
+                      return null;
+                    },
                     decoration: const InputDecoration(
                       label: Text('Title'),
-                    ),
-                  ),
-                  TextFormField(
-                    decoration: const InputDecoration(
-                      label: Text('Invite'),
                     ),
                   ),
                 ],
@@ -73,15 +83,19 @@ class _RoomListState extends State<Landing> {
               ),
               child: const Text('Create'),
               onPressed: () {
-                context.pop();
-                var room = RoomObject(
-                  title: 'title',
-                  id: _getRandomString(25),
-                  members: [],
-                );
-                setState(() {
-                  rooms.add(room);
-                });
+                if (formKey.currentState?.validate() != null &&
+                    formKey.currentState!.validate()) {
+                  formKey.currentState!.save();
+                  var room = RoomObject(
+                    title: title,
+                    id: _getRandomString(25),
+                    members: [],
+                  );
+                  setState(() {
+                    rooms.add(room);
+                  });
+                  context.pop();
+                }
               },
             ),
           ],
