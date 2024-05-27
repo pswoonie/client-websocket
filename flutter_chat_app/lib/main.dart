@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_chat_app/pages/landing/landing.dart';
-import 'package:flutter_chat_app/pages/room/room.dart';
+import 'package:flutter_chat_app/pages/chat_room/chat_room.dart';
 import 'package:go_router/go_router.dart';
 
 void main() {
