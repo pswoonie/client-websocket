@@ -19,7 +19,7 @@ class Landing extends StatefulWidget {
 class _RoomListState extends State<Landing> {
   final formKey = GlobalKey<FormState>();
   int currentPageIndex = 1;
-  var rooms = <RoomObject>[];
+  var rooms = <RoomModel>[];
   final String chars =
       'AaBbCcDdEeFfGgHhIiJjKkLlMmNnOoPpQqRrSsTtUuVvWwXxYyZz1234567890';
   final Random random = Random();
@@ -86,7 +86,7 @@ class _RoomListState extends State<Landing> {
                 if (formKey.currentState?.validate() != null &&
                     formKey.currentState!.validate()) {
                   formKey.currentState!.save();
-                  var room = RoomObject(
+                  var room = RoomModel(
                     title: title,
                     id: _getRandomString(25),
                     members: [],

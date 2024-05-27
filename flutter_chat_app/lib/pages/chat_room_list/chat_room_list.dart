@@ -4,7 +4,7 @@ import 'package:go_router/go_router.dart';
 import '../../model/room_model.dart';
 
 class ChatRoomList extends StatefulWidget {
-  final List<RoomObject> rooms;
+  final List<RoomModel> rooms;
   const ChatRoomList({super.key, required this.rooms});
 
   @override
@@ -32,6 +32,7 @@ class _ChatRoomListState extends State<ChatRoomList> {
               shrinkWrap: true,
               physics: const NeverScrollableScrollPhysics(),
               itemBuilder: (context, index) {
+                RoomModel room = widget.rooms[index];
                 return ListTile(
                   minTileHeight: 60,
                   leading: Container(
@@ -43,15 +44,25 @@ class _ChatRoomListState extends State<ChatRoomList> {
                     ),
                     child: const Icon(Icons.person),
                   ),
-                  title: const Text(
-                    'hi hi hi hi h i hi hi h i hi h i hi hi h ii i h ih ih ih i hi hi ',
+                  title: Text(
+                    room.title,
                     overflow: TextOverflow.ellipsis,
                   ),
-                  subtitle: const Text(
-                    'hello hello hello hello hello hello hello hello hleloo hello ehleoo',
+                  subtitle: Text(
+                    room.id,
                     overflow: TextOverflow.ellipsis,
                   ),
-                  trailing: const Text('hi'),
+                  trailing: Visibility(
+                    visible: !room.isRead,
+                    child: Container(
+                      height: 16,
+                      width: 16,
+                      decoration: const BoxDecoration(
+                        color: Colors.red,
+                        shape: BoxShape.circle,
+                      ),
+                    ),
+                  ),
                   onTap: () {
                     context.go('/room');
                   },

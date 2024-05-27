@@ -1,11 +1,13 @@
-class RoomObject {
+class RoomModel {
   String title;
   String id;
   List members;
+  bool isRead;
 
-  RoomObject({
+  RoomModel({
     required this.title,
     required this.id,
     required this.members,
+    this.isRead = false,
   });
 }
