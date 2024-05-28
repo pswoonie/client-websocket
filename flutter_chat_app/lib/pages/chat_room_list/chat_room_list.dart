@@ -1,8 +1,13 @@
-import 'package:flutter/material.dart';
-import 'package:flutter_chat_app/state/chat_list_state.dart';
-import 'package:go_router/go_router.dart';
+import 'dart:convert';
+import 'dart:typed_data';
 
+import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
+import 'package:encrypt/encrypt.dart' as aes;
+
+import '../../Encryption/encryption_key.dart';
 import '../../model/room_model.dart';
+import '../../state/chat_list_state.dart';
 
 class ChatRoomList extends StatelessWidget {
   final ChatRoomListState chatRoomListStateController;
@@ -64,7 +69,6 @@ class ChatRoomList extends StatelessWidget {
                         ),
                       ),
                       onTap: () {
-                        context.go('/room');
                         if (!room.isRead) {
                           room.isRead = true;
                           chatRoomListStateController.updateIsRead(
@@ -72,6 +76,14 @@ class ChatRoomList extends StatelessWidget {
                             index: index,
                           );
                         }
+                        var str = jsonEncode(room);
+                        var key = aes.Key.fromUtf8(EncryptionKey.encryptionKey);
+                        // var iv = aes.IV.fromLength(16);
+                        var iv = aes.IV(Uint8List(16));
+                        var encrypter = aes.Encrypter(aes.AES(key));
+                        var encrypted = encrypter.encrypt(str, iv: iv);
+                        var param = Uri.encodeComponent(encrypted.base64);
+                        context.go('/room?name=$param');
                       },
                     );
                   },
