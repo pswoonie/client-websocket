@@ -34,7 +34,6 @@ class MyApp extends StatelessWidget {
                 var iv = aes.IV(Uint8List(16));
                 var encrypter = aes.Encrypter(aes.AES(key));
                 var decrypted = encrypter.decrypt64(name, iv: iv);
-                debugPrint(decrypted);
                 var map = jsonDecode(decrypted) as Map<String, dynamic>;
                 var room = RoomModel.fromJson(map);
                 return ChatRoom(room: room);
