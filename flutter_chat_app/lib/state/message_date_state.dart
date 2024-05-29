@@ -4,12 +4,6 @@ import 'package:timeago/timeago.dart' as timeago;
 import '../model/message_model.dart';
 
 class MessageDateTimeState with ChangeNotifier {
-  // DateTime _prev = DateTime(1, 1, 1);
-  // DateTime get prev => _prev;
-
-  // DateTime _recent = DateTime(1, 1, 1);
-  // DateTime get recent => _recent;
-
   List<MessageModel> _messages = [];
   List<MessageModel> get messages => _messages.toList();
 
@@ -56,12 +50,6 @@ class MessageDateTimeState with ChangeNotifier {
     _messages = [...newList];
     notifyListeners();
   }
-
-  // void setDateTime(DateTime param) {
-  //   // _prev = recent;
-  //   _recent = param;
-  //   notifyListeners();
-  // }
 
   void addNewMessage(MessageModel param) {
     var date = DateTime(

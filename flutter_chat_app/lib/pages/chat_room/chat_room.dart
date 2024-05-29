@@ -27,9 +27,6 @@ class _RoomState extends State<ChatRoom> {
     var now = DateTime.now();
     var curr = DateTime(now.year, now.month, now.day, now.hour, now.minute);
     _messageDateTimeStateController.initDateTime(curr);
-    // for (MessageModel message in _messageDateTimeStateController.messages) {
-    //   _messageDateTimeStateController.setDateTime(message.date);
-    // }
   }
 
   @override
@@ -170,8 +167,6 @@ class _RoomState extends State<ChatRoom> {
                           date: DateTime.now(),
                         );
                         _messageDateTimeStateController.addNewMessage(message);
-                        // _messageDateTimeStateController
-                        //     .setDateTime(message.date);
                         _formKey.currentState?.reset();
                       },
                       decoration: InputDecoration(
@@ -202,7 +197,6 @@ class _RoomState extends State<ChatRoom> {
                         date: DateTime.now(),
                       );
                       _messageDateTimeStateController.addNewMessage(message);
-                      // _messageDateTimeStateController.setDateTime(message.date);
                       _formKey.currentState?.reset();
                     }
                   },
