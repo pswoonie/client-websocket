@@ -1,5 +1,6 @@
 import 'package:chat_bubbles/chat_bubbles.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_chat_app/state/message_date_state.dart';
 
 import '../../model/message_model.dart';
 import '../../model/room_model.dart';
@@ -14,27 +15,8 @@ class ChatRoom extends StatefulWidget {
 
 class _RoomState extends State<ChatRoom> {
   final _formKey = GlobalKey<FormState>();
-  List<MessageModel> messages = [
-    MessageModel(
-      id: '0',
-      content: 'testing',
-      senderId: 'senderId',
-      date: DateTime.now().subtract(const Duration(minutes: 10)),
-    ),
-    MessageModel(
-      id: '1',
-      content: 'testing long long long long message',
-      senderId: 'senderId',
-      date: DateTime.now().subtract(const Duration(minutes: 5)),
-    ),
-    MessageModel(
-      id: '2',
-      content:
-          'testing long long long long long long long long long long long long long message',
-      senderId: 'senderId',
-      date: DateTime.now().subtract(const Duration(minutes: 1)),
-    ),
-  ];
+  final MessageDateTimeState _messageDateTimeStateController =
+      MessageDateTimeState();
   // final _channel = WebSocketChannel.connect(Uri.parse('ws://127.0.0.1:3000'));
 
   String text = '';
@@ -42,6 +24,12 @@ class _RoomState extends State<ChatRoom> {
   @override
   void initState() {
     super.initState();
+    var now = DateTime.now();
+    var curr = DateTime(now.year, now.month, now.day, now.hour, now.minute);
+    _messageDateTimeStateController.initDateTime(curr);
+    // for (MessageModel message in _messageDateTimeStateController.messages) {
+    //   _messageDateTimeStateController.setDateTime(message.date);
+    // }
   }
 
   @override
@@ -79,32 +67,67 @@ class _RoomState extends State<ChatRoom> {
                 //   },
                 // ),
 
-                ListView.builder(
-                  shrinkWrap: true,
-                  physics: const NeverScrollableScrollPhysics(),
-                  itemCount: messages.length,
-                  itemBuilder: (context, index) {
-                    var message = messages[index];
-                    return Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Align(
-                          alignment: (message.senderId == 'me')
-                              ? Alignment.centerRight
-                              : Alignment.centerLeft,
-                          child: BubbleSpecialThree(
-                            text: message.content,
-                            color: (message.senderId == 'me')
-                                ? Colors.deepPurple.shade50
-                                : Colors.deepPurple.shade100,
-                            tail: true,
-                            isSender: (message.senderId == 'me'),
-                          ),
-                        ),
-                      ],
-                    );
-                  },
-                ),
+                ListenableBuilder(
+                    listenable: _messageDateTimeStateController,
+                    builder: (context, child) {
+                      return ListView.builder(
+                        shrinkWrap: true,
+                        physics: const NeverScrollableScrollPhysics(),
+                        itemCount:
+                            _messageDateTimeStateController.messages.length,
+                        itemBuilder: (context, index) {
+                          var message =
+                              _messageDateTimeStateController.messages[index];
+                          return Column(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Visibility(
+                                visible: !(index ==
+                                    _messageDateTimeStateController
+                                            .messages.length -
+                                        1),
+                                child: Align(
+                                  alignment: (message.senderId == 'me')
+                                      ? Alignment.centerRight
+                                      : Alignment.centerLeft,
+                                  child: BubbleSpecialThree(
+                                    text: message.content,
+                                    color: (message.senderId == 'me')
+                                        ? Colors.deepPurple.shade50
+                                        : Colors.deepPurple.shade100,
+                                    tail: true,
+                                    isSender: (message.senderId == 'me'),
+                                  ),
+                                ),
+                              ),
+                              Visibility(
+                                visible: !_messageDateTimeStateController
+                                    .isSameDateTime(index),
+                                child: Align(
+                                  alignment: (message.senderId == 'me')
+                                      ? Alignment.centerRight
+                                      : Alignment.centerLeft,
+                                  child: Padding(
+                                    padding: (message.senderId == 'me')
+                                        ? const EdgeInsets.fromLTRB(
+                                            0, 0, 25, 25)
+                                        : const EdgeInsets.fromLTRB(
+                                            25, 0, 0, 25),
+                                    child: Text(
+                                      _messageDateTimeStateController
+                                          .parseDateTime(message.date),
+                                      style: TextStyle(
+                                          color: Colors.deepPurple[100],
+                                          fontWeight: FontWeight.bold),
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ],
+                          );
+                        },
+                      );
+                    }),
               ],
             ),
           ),
@@ -146,9 +169,9 @@ class _RoomState extends State<ChatRoom> {
                           senderId: 'me',
                           date: DateTime.now(),
                         );
-                        setState(() {
-                          messages.add(message);
-                        });
+                        _messageDateTimeStateController.addNewMessage(message);
+                        // _messageDateTimeStateController
+                        //     .setDateTime(message.date);
                         _formKey.currentState?.reset();
                       },
                       decoration: InputDecoration(
@@ -178,9 +201,8 @@ class _RoomState extends State<ChatRoom> {
                         senderId: 'me',
                         date: DateTime.now(),
                       );
-                      setState(() {
-                        messages.add(message);
-                      });
+                      _messageDateTimeStateController.addNewMessage(message);
+                      // _messageDateTimeStateController.setDateTime(message.date);
                       _formKey.currentState?.reset();
                     }
                   },
