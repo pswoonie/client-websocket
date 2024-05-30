@@ -62,9 +62,6 @@ class MessageDateTimeState with ChangeNotifier {
     var model = param;
     model.date = date;
     _messages.insert(_messages.length - 1, model);
-    for (MessageModel mes in _messages) {
-      debugPrint(mes.date.toString());
-    }
     notifyListeners();
   }
 

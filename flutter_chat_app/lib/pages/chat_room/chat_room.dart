@@ -1,6 +1,7 @@
 import 'package:chat_bubbles/chat_bubbles.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_chat_app/state/message_date_state.dart';
+import 'package:web_socket_channel/web_socket_channel.dart';
 
 import '../../model/message_model.dart';
 import '../../model/room_model.dart';
@@ -17,7 +18,8 @@ class _RoomState extends State<ChatRoom> {
   final _formKey = GlobalKey<FormState>();
   final MessageDateTimeState _messageDateTimeStateController =
       MessageDateTimeState();
-  // final _channel = WebSocketChannel.connect(Uri.parse('ws://127.0.0.1:3000'));
+
+  final _channel = WebSocketChannel.connect(Uri.parse('ws://127.0.0.1:3000'));
 
   String text = '';
 
@@ -54,16 +56,19 @@ class _RoomState extends State<ChatRoom> {
               shrinkWrap: true,
               reverse: true,
               children: [
-                // StreamBuilder(
-                //   stream: _channel.stream,
-                //   builder: (context, snapshot) {
-                //     return Text(
-                //       snapshot.hasData ? snapshot.data : '',
-                //       style: Theme.of(context).textTheme.headlineMedium,
-                //     );
-                //   },
-                // ),
+                StreamBuilder(
+                  stream: _channel.stream,
+                  builder: (context, snapshot) {
+                    if (!snapshot.hasData) {
+                      return const SizedBox();
+                    }
 
+                    var message = snapshot.data;
+                    debugPrint(message);
+
+                    return const SizedBox();
+                  },
+                ),
                 ListenableBuilder(
                     listenable: _messageDateTimeStateController,
                     builder: (context, child) {
@@ -159,7 +164,8 @@ class _RoomState extends State<ChatRoom> {
                       },
                       onFieldSubmitted: (str) {
                         if (str.isEmpty) return;
-
+                        // TODO: modify here
+                        _channel.sink.add(str);
                         var message = MessageModel(
                           id: text,
                           content: str,
@@ -190,6 +196,8 @@ class _RoomState extends State<ChatRoom> {
                     if (_formKey.currentState?.validate() != null &&
                         _formKey.currentState!.validate()) {
                       _formKey.currentState!.save();
+                      // TODO: modify here
+                      _channel.sink.add(text);
                       var message = MessageModel(
                         id: text,
                         content: text,
@@ -216,7 +224,7 @@ class _RoomState extends State<ChatRoom> {
 
   @override
   void dispose() {
-    // _channel.sink.close();
+    _channel.sink.close();
     super.dispose();
   }
 }

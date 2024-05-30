@@ -5,13 +5,15 @@ import 'package:flutter_chat_app/state/chat_list_state.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../model/room_model.dart';
+import '../../state/login_state.dart';
 import '../chat_room_list/chat_room_list.dart';
 import '../friends/friends.dart';
 import '../more/more.dart';
 import '../shop/shop.dart';
 
 class Landing extends StatefulWidget {
-  const Landing({super.key});
+  final LoginState controller;
+  const Landing({super.key, required this.controller});
 
   @override
   State<Landing> createState() => _RoomListState();
@@ -165,6 +167,7 @@ class _RoomListState extends State<Landing> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        automaticallyImplyLeading: false,
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
         centerTitle: false,
         titleSpacing: 16,
@@ -206,7 +209,9 @@ class _RoomListState extends State<Landing> {
         const Friends(),
         ChatRoomList(chatRoomListStateController: chatRoomListStateController),
         const Shop(),
-        const More(),
+        More(
+          controller: widget.controller,
+        ),
       ][currentPageIndex],
       extendBody: true,
       floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
