@@ -83,7 +83,7 @@ class ChatRoomList extends StatelessWidget {
                         var encrypter = aes.Encrypter(aes.AES(key));
                         var encrypted = encrypter.encrypt(str, iv: iv);
                         var param = Uri.encodeComponent(encrypted.base64);
-                        context.go('/room?name=$param');
+                        context.go('/landing/room?name=$param');
                       },
                     );
                   },

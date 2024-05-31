@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:chat_bubbles/chat_bubbles.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_chat_app/state/message_date_state.dart';
@@ -5,10 +7,12 @@ import 'package:web_socket_channel/web_socket_channel.dart';
 
 import '../../model/message_model.dart';
 import '../../model/room_model.dart';
+import '../../state/login_state.dart';
 
 class ChatRoom extends StatefulWidget {
   final RoomModel? room;
-  const ChatRoom({super.key, this.room});
+  final LoginState controller;
+  const ChatRoom({super.key, this.room, required this.controller});
 
   @override
   State<ChatRoom> createState() => _RoomState();
@@ -19,6 +23,8 @@ class _RoomState extends State<ChatRoom> {
   final MessageDateTimeState _messageDateTimeStateController =
       MessageDateTimeState();
 
+  late String uid;
+
   final _channel = WebSocketChannel.connect(Uri.parse('ws://127.0.0.1:3000'));
 
   String text = '';
@@ -26,6 +32,7 @@ class _RoomState extends State<ChatRoom> {
   @override
   void initState() {
     super.initState();
+    uid = widget.controller.user.id;
     var now = DateTime.now();
     var curr = DateTime(now.year, now.month, now.day, now.hour, now.minute);
     _messageDateTimeStateController.initDateTime(curr);
@@ -47,6 +54,12 @@ class _RoomState extends State<ChatRoom> {
       appBar: AppBar(
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
         title: Text(widget.room!.title),
+        actions: [
+          IconButton(
+            onPressed: () {},
+            icon: const Icon(Icons.person_add_alt_rounded),
+          ),
+        ],
       ),
       body: Column(
         mainAxisSize: MainAxisSize.max,
@@ -63,8 +76,15 @@ class _RoomState extends State<ChatRoom> {
                       return const SizedBox();
                     }
 
-                    var message = snapshot.data;
-                    debugPrint(message);
+                    var data = snapshot.data;
+                    var messageMap = jsonDecode(data) as Map<String, dynamic>;
+                    var message = MessageModel.fromJson(messageMap);
+
+                    WidgetsBinding.instance.addPostFrameCallback((_) {
+                      if (mounted) {
+                        _messageDateTimeStateController.addNewMessage(message);
+                      }
+                    });
 
                     return const SizedBox();
                   },
@@ -89,16 +109,16 @@ class _RoomState extends State<ChatRoom> {
                                             .messages.length -
                                         1),
                                 child: Align(
-                                  alignment: (message.senderId == 'me')
+                                  alignment: (message.uid == uid)
                                       ? Alignment.centerRight
                                       : Alignment.centerLeft,
                                   child: BubbleSpecialThree(
                                     text: message.content,
-                                    color: (message.senderId == 'me')
+                                    color: (message.uid == uid)
                                         ? Colors.deepPurple.shade50
                                         : Colors.deepPurple.shade100,
                                     tail: true,
-                                    isSender: (message.senderId == 'me'),
+                                    isSender: (message.uid == uid),
                                   ),
                                 ),
                               ),
@@ -106,11 +126,11 @@ class _RoomState extends State<ChatRoom> {
                                 visible: !_messageDateTimeStateController
                                     .isSameDateTime(index),
                                 child: Align(
-                                  alignment: (message.senderId == 'me')
+                                  alignment: (message.uid == uid)
                                       ? Alignment.centerRight
                                       : Alignment.centerLeft,
                                   child: Padding(
-                                    padding: (message.senderId == 'me')
+                                    padding: (message.uid == uid)
                                         ? const EdgeInsets.fromLTRB(
                                             0, 0, 25, 25)
                                         : const EdgeInsets.fromLTRB(
@@ -164,14 +184,15 @@ class _RoomState extends State<ChatRoom> {
                       },
                       onFieldSubmitted: (str) {
                         if (str.isEmpty) return;
-                        // TODO: modify here
-                        _channel.sink.add(str);
                         var message = MessageModel(
-                          id: text,
+                          id: str,
+                          rid: widget.room!.id,
+                          uid: uid,
                           content: str,
-                          senderId: 'me',
                           date: DateTime.now(),
                         );
+                        // TODO: modify here
+                        _channel.sink.add(jsonEncode(message));
                         _messageDateTimeStateController.addNewMessage(message);
                         _formKey.currentState?.reset();
                       },
@@ -196,14 +217,15 @@ class _RoomState extends State<ChatRoom> {
                     if (_formKey.currentState?.validate() != null &&
                         _formKey.currentState!.validate()) {
                       _formKey.currentState!.save();
-                      // TODO: modify here
-                      _channel.sink.add(text);
                       var message = MessageModel(
                         id: text,
+                        rid: widget.room!.id,
+                        uid: uid,
                         content: text,
-                        senderId: 'me',
                         date: DateTime.now(),
                       );
+                      // TODO: modify here
+                      _channel.sink.add(jsonEncode(message));
                       _messageDateTimeStateController.addNewMessage(message);
                       _formKey.currentState?.reset();
                     }

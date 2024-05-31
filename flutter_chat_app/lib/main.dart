@@ -47,10 +47,13 @@ class MyApp extends StatelessWidget {
                     var decrypted = encrypter.decrypt64(name, iv: iv);
                     var map = jsonDecode(decrypted) as Map<String, dynamic>;
                     var room = RoomModel.fromJson(map);
-                    return ChatRoom(room: room);
+                    return ChatRoom(
+                      room: room,
+                      controller: loginStateController,
+                    );
                   }
 
-                  return const ChatRoom(room: null);
+                  return ChatRoom(room: null, controller: loginStateController);
                 },
               ),
             ],

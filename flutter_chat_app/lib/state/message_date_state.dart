@@ -11,39 +11,45 @@ class MessageDateTimeState with ChangeNotifier {
     var newList = [
       MessageModel(
         id: '0',
+        rid: 'rid',
+        uid: 'senderId',
         content: 'testing',
-        senderId: 'senderId',
         date: param.subtract(const Duration(minutes: 10)),
       ),
       MessageModel(
         id: '1',
+        rid: 'rid',
+        uid: 'senderId',
         content: 'testing long long long long message',
-        senderId: 'senderId',
         date: param.subtract(const Duration(minutes: 5)),
       ),
       MessageModel(
         id: '2',
+        rid: 'rid',
+        uid: 'senderId',
         content: 'testing long long long long message',
-        senderId: 'senderId',
         date: param.subtract(const Duration(minutes: 5)),
       ),
       MessageModel(
         id: '3',
+        rid: 'rid',
+        uid: 'senderId',
         content:
             'testing long long long long long long long long long long long long long message',
-        senderId: 'senderId',
         date: param.subtract(const Duration(minutes: 1)),
       ),
       MessageModel(
         id: '4',
+        rid: 'rid',
+        uid: 'senderId',
         content: 'testing long long lonlong long long long message',
-        senderId: 'senderId',
         date: param,
       ),
       MessageModel(
         id: '',
+        rid: '',
+        uid: '',
         content: '',
-        senderId: '',
         date: DateTime(1, 1, 1, 1, 1, 1),
       ),
     ];
@@ -70,7 +76,7 @@ class MessageDateTimeState with ChangeNotifier {
       return true;
     }
 
-    if (_messages[now].senderId == _messages[now + 1].senderId) {
+    if (_messages[now].uid == _messages[now + 1].uid) {
       return _messages[now].date.compareTo(_messages[now + 1].date) == 0;
     }
 

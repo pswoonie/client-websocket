@@ -1,26 +1,30 @@
 class MessageModel {
   String id;
+  String rid;
+  String uid;
   String content;
-  String senderId;
   DateTime date;
 
   MessageModel({
     required this.id,
+    required this.rid,
+    required this.uid,
     required this.content,
-    required this.senderId,
     required this.date,
   });
 
   MessageModel.fromJson(Map<String, dynamic> json)
       : id = json['id'] as String,
+        rid = json['rid'] as String,
+        uid = json['uid'] as String,
         content = json['content'] as String,
-        senderId = json['senderId'] as String,
-        date = json['date'] as DateTime;
+        date = DateTime.parse(json['date']);
 
   Map<String, dynamic> toJson() => {
         'id': id,
+        'rid': rid,
+        'uid': uid,
         'content': content,
-        'senderId': senderId,
-        'date': date,
+        'date': date.toIso8601String(),
       };
 }
