@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:io';
 
 import 'package:chat_bubbles/chat_bubbles.dart';
 import 'package:flutter/material.dart';
@@ -25,7 +26,7 @@ class _RoomState extends State<ChatRoom> {
 
   late String uid;
 
-  final _channel = WebSocketChannel.connect(Uri.parse('ws://127.0.0.1:3000'));
+  late WebSocketChannel _channel;
 
   String text = '';
 
@@ -33,6 +34,23 @@ class _RoomState extends State<ChatRoom> {
   void initState() {
     super.initState();
     uid = widget.controller.user.id;
+    if (Platform.isAndroid) {
+      _channel = WebSocketChannel.connect(Uri.parse('ws://10.0.2.2:3000'));
+    } else if (Platform.isIOS) {
+      _channel = WebSocketChannel.connect(Uri.parse('ws://127.0.0.1:3000'));
+    }
+
+    // TODO: Sending initial message to save roomId and userId
+    // Remove this when DB is ready
+    var message = MessageModel(
+      id: DateTime.now().toIso8601String(),
+      rid: widget.room!.id,
+      uid: uid,
+      content: 'Connected',
+      date: DateTime.now(),
+    );
+    _channel.sink.add(jsonEncode(message));
+
     var now = DateTime.now();
     var curr = DateTime(now.year, now.month, now.day, now.hour, now.minute);
     _messageDateTimeStateController.initDateTime(curr);

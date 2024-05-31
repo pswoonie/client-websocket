@@ -9,42 +9,43 @@ class MessageDateTimeState with ChangeNotifier {
 
   void initDateTime(DateTime param) {
     var newList = [
-      MessageModel(
-        id: '0',
-        rid: 'rid',
-        uid: 'senderId',
-        content: 'testing',
-        date: param.subtract(const Duration(minutes: 10)),
-      ),
-      MessageModel(
-        id: '1',
-        rid: 'rid',
-        uid: 'senderId',
-        content: 'testing long long long long message',
-        date: param.subtract(const Duration(minutes: 5)),
-      ),
-      MessageModel(
-        id: '2',
-        rid: 'rid',
-        uid: 'senderId',
-        content: 'testing long long long long message',
-        date: param.subtract(const Duration(minutes: 5)),
-      ),
-      MessageModel(
-        id: '3',
-        rid: 'rid',
-        uid: 'senderId',
-        content:
-            'testing long long long long long long long long long long long long long message',
-        date: param.subtract(const Duration(minutes: 1)),
-      ),
-      MessageModel(
-        id: '4',
-        rid: 'rid',
-        uid: 'senderId',
-        content: 'testing long long lonlong long long long message',
-        date: param,
-      ),
+      // TODO: These items are for testing UI
+      // MessageModel(
+      //   id: '0',
+      //   rid: 'rid',
+      //   uid: 'senderId',
+      //   content: 'testing',
+      //   date: param.subtract(const Duration(minutes: 10)),
+      // ),
+      // MessageModel(
+      //   id: '1',
+      //   rid: 'rid',
+      //   uid: 'senderId',
+      //   content: 'testing long long long long message',
+      //   date: param.subtract(const Duration(minutes: 5)),
+      // ),
+      // MessageModel(
+      //   id: '2',
+      //   rid: 'rid',
+      //   uid: 'senderId',
+      //   content: 'testing long long long long message',
+      //   date: param.subtract(const Duration(minutes: 5)),
+      // ),
+      // MessageModel(
+      //   id: '3',
+      //   rid: 'rid',
+      //   uid: 'senderId',
+      //   content:
+      //       'testing long long long long long long long long long long long long long message',
+      //   date: param.subtract(const Duration(minutes: 1)),
+      // ),
+      // MessageModel(
+      //   id: '4',
+      //   rid: 'rid',
+      //   uid: 'senderId',
+      //   content: 'testing long long lonlong long long long message',
+      //   date: param,
+      // ),
       MessageModel(
         id: '',
         rid: '',

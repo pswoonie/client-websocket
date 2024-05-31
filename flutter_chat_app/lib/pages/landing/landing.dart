@@ -36,15 +36,16 @@ class _RoomListState extends State<Landing> {
   String _getRandomString(int length) => String.fromCharCodes(Iterable.generate(
       length, (_) => chars.codeUnitAt(random.nextInt(chars.length))));
 
-  Future<void> _showDialog(BuildContext context) {
+  Future<void> _showDialog(BuildContext context, {String useFor = 'default'}) {
     String title = '';
+    String roomId = '';
     return showDialog<void>(
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
           title: const Text('Create Room'),
           content: SizedBox(
-            height: 300,
+            height: 200,
             width: MediaQuery.of(context).size.width,
             child: Form(
               key: formKey,
@@ -65,6 +66,29 @@ class _RoomListState extends State<Landing> {
                     },
                     decoration: const InputDecoration(
                       label: Text('Title'),
+                    ),
+                  ),
+
+                  // TODO: this section is for testing without DB
+                  // Remember to change this
+                  Visibility(
+                    visible: !(useFor == 'default'),
+                    child: TextFormField(
+                      onSaved: (str) {
+                        if (str != null) {
+                          roomId = str;
+                        }
+                      },
+                      validator: (str) {
+                        if (str == null || str.isEmpty) {
+                          return 'Chat Room ID is REQUIRED!';
+                        }
+
+                        return null;
+                      },
+                      decoration: const InputDecoration(
+                        label: Text('Chap Room ID'),
+                      ),
                     ),
                   ),
                 ],
@@ -90,12 +114,26 @@ class _RoomListState extends State<Landing> {
                 if (formKey.currentState?.validate() != null &&
                     formKey.currentState!.validate()) {
                   formKey.currentState!.save();
-                  var room = RoomModel(
-                    title: title,
-                    id: _getRandomString(25),
-                    members: [],
-                  );
-                  chatRoomListStateController.addRoom(room);
+                  if (useFor == 'default') {
+                    var room = RoomModel(
+                      title: title,
+                      id: _getRandomString(25),
+                      members: [],
+                    );
+                    debugPrint(room.id);
+                    chatRoomListStateController.addRoom(room);
+                  }
+
+                  // TODO: This section is for testing without DB
+                  // Remember to change this
+                  else {
+                    var room = RoomModel(
+                      title: title,
+                      id: roomId,
+                      members: [],
+                    );
+                    chatRoomListStateController.addRoom(room);
+                  }
                   context.pop();
                 }
               },
@@ -193,6 +231,13 @@ class _RoomListState extends State<Landing> {
                   child: IconButton(
                     onPressed: () => _showDialog(context),
                     icon: const Icon(Icons.add),
+                  ),
+                ),
+                Visibility(
+                  visible: currentPageIndex == 1,
+                  child: IconButton(
+                    onPressed: () => _showDialog(context, useFor: 'find_group'),
+                    icon: const Icon(Icons.group_add),
                   ),
                 ),
                 Visibility(
