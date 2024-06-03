@@ -1,14 +1,27 @@
+import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
 import 'package:chat_bubbles/chat_bubbles.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_chat_app/state/message_date_state.dart';
-import 'package:web_socket_channel/web_socket_channel.dart';
+import 'package:socket_io_client/socket_io_client.dart' as io;
 
 import '../../model/message_model.dart';
 import '../../model/room_model.dart';
 import '../../state/login_state.dart';
+
+class StreamSocket {
+  final _socketResponse = StreamController<String>();
+
+  void Function(String) get addResponse => _socketResponse.sink.add;
+
+  Stream<String> get getResponse => _socketResponse.stream;
+
+  void dispose() {
+    _socketResponse.close();
+  }
+}
 
 class ChatRoom extends StatefulWidget {
   final RoomModel? room;
@@ -21,12 +34,15 @@ class ChatRoom extends StatefulWidget {
 
 class _RoomState extends State<ChatRoom> {
   final _formKey = GlobalKey<FormState>();
+
+  StreamSocket streamSocket = StreamSocket();
+
   final MessageDateTimeState _messageDateTimeStateController =
       MessageDateTimeState();
 
   late String uid;
 
-  late WebSocketChannel _channel;
+  late io.Socket socket;
 
   String text = '';
 
@@ -35,25 +51,57 @@ class _RoomState extends State<ChatRoom> {
     super.initState();
     uid = widget.controller.user.id;
     if (Platform.isAndroid) {
-      _channel = WebSocketChannel.connect(Uri.parse('ws://10.0.2.2:3000'));
+      socket = io.io(
+        'http://10.0.2.2:3000',
+        io.OptionBuilder()
+            .setTransports(['websocket'])
+            .disableAutoConnect()
+            .build(),
+      );
     } else if (Platform.isIOS) {
-      _channel = WebSocketChannel.connect(Uri.parse('ws://127.0.0.1:3000'));
+      socket = io.io(
+        'http://127.0.0.1:3000',
+        io.OptionBuilder()
+            .setTransports(['websocket'])
+            .disableAutoConnect()
+            .build(),
+      );
     }
 
-    // TODO: Sending initial message to save roomId and userId
-    // Remove this when DB is ready
-    var message = MessageModel(
-      id: DateTime.now().toIso8601String(),
-      rid: widget.room!.id,
-      uid: uid,
-      content: 'Connected',
-      date: DateTime.now(),
-    );
-    _channel.sink.add(jsonEncode(message));
+    socket.connect();
+
+    socket.onConnect((_) {
+      // Sending initial message to save roomId and userId
+      var message = MessageModel(
+        id: DateTime.now().toIso8601String(),
+        rid: widget.room!.id,
+        uid: uid,
+        content: 'Connected',
+        date: DateTime.now(),
+      );
+
+      socket.emit('JOIN_ROOM', message.toJson());
+    });
+
+    socket.on('CONNECTED', (data) {
+      messageToString(data);
+    });
+
+    socket.on('FROM_SERVER', (data) {
+      messageToString(data);
+    });
+
+    socket.onDisconnect((_) => debugPrint('disconnect'));
 
     var now = DateTime.now();
     var curr = DateTime(now.year, now.month, now.day, now.hour, now.minute);
     _messageDateTimeStateController.initDateTime(curr);
+  }
+
+  void messageToString(Map<String, dynamic> data) {
+    var message = MessageModel.fromJson(data);
+    var jsonMsg = jsonEncode(message);
+    streamSocket.addResponse(jsonMsg);
   }
 
   @override
@@ -88,13 +136,13 @@ class _RoomState extends State<ChatRoom> {
               reverse: true,
               children: [
                 StreamBuilder(
-                  stream: _channel.stream,
+                  stream: streamSocket.getResponse,
                   builder: (context, snapshot) {
                     if (!snapshot.hasData) {
                       return const SizedBox();
                     }
 
-                    var data = snapshot.data;
+                    var data = snapshot.data as String;
                     var messageMap = jsonDecode(data) as Map<String, dynamic>;
                     var message = MessageModel.fromJson(messageMap);
 
@@ -210,7 +258,7 @@ class _RoomState extends State<ChatRoom> {
                           date: DateTime.now(),
                         );
                         // TODO: modify here
-                        _channel.sink.add(jsonEncode(message));
+                        socket.emit('FROM_CLIENT', message.toJson());
                         _messageDateTimeStateController.addNewMessage(message);
                         _formKey.currentState?.reset();
                       },
@@ -243,7 +291,7 @@ class _RoomState extends State<ChatRoom> {
                         date: DateTime.now(),
                       );
                       // TODO: modify here
-                      _channel.sink.add(jsonEncode(message));
+                      socket.emit('FROM_CLIENT', message.toJson());
                       _messageDateTimeStateController.addNewMessage(message);
                       _formKey.currentState?.reset();
                     }
@@ -264,7 +312,8 @@ class _RoomState extends State<ChatRoom> {
 
   @override
   void dispose() {
-    _channel.sink.close();
+    socket.disconnect();
+    socket.dispose();
     super.dispose();
   }
 }
